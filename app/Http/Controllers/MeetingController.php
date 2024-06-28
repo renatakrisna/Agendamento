@@ -16,23 +16,28 @@ class MeetingController extends Controller
 
     public function create()
     {
-        $coordinators = User::all();
-        $students = User::all();
+        $coordinators = User::where('role', 'coordinator')->get();
+        $students = User::where('role', 'student')->get();
         return view('meetings.create', compact('coordinators', 'students'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'scheduled_at' => 'required',
             'coordinator_id' => 'required|exists:users,id',
             'student_id' => 'required|exists:users,id',
-            'scheduled_at' => 'required|date',
-            'location' => 'required|string|max:255',
+            'location' => 'required',
         ]);
 
-        Meeting::create($request->all());
+         Meeting::create([
+            'scheduled_at' => $request->scheduled_at,
+            'coordinator_id' => $request->coordinator_id,
+            'student_id' => $request->student_id,
+            'location' => $request->location,
+        ]);
 
-        return redirect()->route('meetings.index')->with('success', 'Reunião agendada com sucesso.');
+    return redirect()->route('meetings.index')->with('success', 'Reunião agendada com sucesso.');
     }
 
     public function show(Meeting $meeting)
@@ -42,8 +47,8 @@ class MeetingController extends Controller
 
     public function edit(Meeting $meeting)
     {
-        $coordinators = User::all();
-        $students = User::all();
+        $coordinators = User::where('role', 'coordinator')->get();
+        $students = User::where('role', 'student')->get();
         return view('meetings.edit', compact('meeting', 'coordinators', 'students'));
     }
 

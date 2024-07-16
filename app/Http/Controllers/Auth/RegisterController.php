@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\CoordinatorHours;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
@@ -64,11 +65,20 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
         ]);
+
+        if ($data['role'] == 'coordinator'){
+            CoordinatorHours::create([
+                'coordinator_id' => $user->id,
+                'start_time' => '08:00:00',
+                'end_time' => '17:00:00',
+            ]);
+        }
+        return $user;
     }
 }

@@ -18,6 +18,10 @@
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                 @csrf
                             </form>
+                            @if (Auth::check() && Auth::user()->role == 'coordinator')
+                            <a class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" href="{{ route('coordinator_hours.edit', ['id' => Auth::user()->id]) }}" onclick="event.preventDefault(); document.getElementById('edit-form').submit();">{{ __('Editar Horário de Atendimento') }}</a>
+                            <form id="edit-form" action="{{ route('coordinator_hours.edit', ['id' => Auth::user()->id]) }}" method="GET" class="d-none"></form>
+                            @endif
                         </div>
                     </div>
                 </div>

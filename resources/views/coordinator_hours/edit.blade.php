@@ -19,7 +19,7 @@
                 <br></br>
 
                 <div class="card-body">
-                    <form method="PUT" action="{{ route('coordinator_hours.update', ['id' => Auth::user()->id]) }}">
+                    <form method="POST" action="{{ route('coordinator_hours.update', ['id' => Auth::user()->id]) }}">
                         @csrf
 
                         <div class="mb-3">

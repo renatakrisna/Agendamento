@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CoordinatorHours;
 use Illuminate\Http\Request;
 use App\Models\Meeting;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class MeetingController extends Controller
 {
     public function index()
     {
-        $meetings = Meeting::all();
+        if(Auth::user()->role == 'coordinator'){
+            
+            $meetings = Meeting::where('coordinator_id',Auth::user()->id)->get();        
+        } else {
+            $meetings = Meeting::where('student_id',Auth::user()->id)->get();  
+        }
         return view('meetings.index', compact('meetings'));
     }
 
@@ -49,15 +56,22 @@ class MeetingController extends Controller
         if ($meeting) {
             return redirect()->route('meetings.create')->with('alreadyExist', 'Já existe uma reunião agendada neste horário!');
         } else {
-
-            Meeting::create([
-                'scheduled_at' => $request->scheduled_at,
-                'coordinator_id' => $request->coordinator_id,
-                'student_id' => $request->student_id,
-                'location' => $request->location,
-            ]);
-
-            return redirect()->route('meetings.index')->with('success', 'Reunião agendada com sucesso.');
+            $horario = explode('T',$request->scheduled_at)[1];
+            $coor_hora = CoordinatorHours::where('start_time','<',$horario)
+            ->where('end_time','>',$horario)->first();
+            
+            if ($coor_hora != null){
+                Meeting::create([
+                    'scheduled_at' => $request->scheduled_at,
+                    'coordinator_id' => $request->coordinator_id,
+                    'student_id' => $request->student_id,
+                    'location' => $request->location,
+                ]);
+    
+                return redirect()->route('meetings.index')->with('success', 'Reunião agendada com sucesso.');
+            } else {
+                return redirect()->route('meetings.create')->with('alreadyExist', 'Este horário não está disponível para coordenador selecionado!');
+            }
         }
     }
 

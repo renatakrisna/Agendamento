@@ -37,17 +37,18 @@ class CoordinatorHoursController extends Controller
         return view('coordinator_hours.edit', compact('coordinatorHours'));
     }
 
-    public function update(Request $request, CoordinatorHours $coordinatorHours)
+    public function update($id, Request $request, CoordinatorHours $coordinatorHours)
     {
         $request->validate([
-            'coordinator_id' => 'required|exists:users,id',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
         ]);
 
-        $coordinatorHours->update($request->all());
+        $dados = $request->all();
+        CoordinatorHours::where('coordinator_id', $id)
+                        ->update(['start_time' => $dados['start_time'], 'end_time' => $dados['end_time']]);
 
-        return redirect()->route('coordinator_hours.index')
+        return redirect()->route('meetings.index')
                          ->with('success', 'Horário de atendimento atualizado com sucesso!');
     }
 }
